@@ -12,7 +12,6 @@ setup(
             'taskstack-stop = taskstack.__main__:stop',
             'taskstack-next = taskstack.__main__:next',
             'ts = taskstack.__main__:main',
-            'ts = taskstack.__main__:main',
         ],
     },
 )
