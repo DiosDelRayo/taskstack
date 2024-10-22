@@ -1,6 +1,18 @@
 from.taskstack import TaskStack
 from argparse import ArgumentParser
 
+def start():
+    taskstack = TaskStack()
+    taskstack.start()
+
+def stop():
+    taskstack = TaskStack()
+    taskstack.stop()
+
+def next():
+    taskstack = TaskStack()
+    taskstack.next()
+
 def main():
     parser = ArgumentParser(description='TaskStack CLI')
     subparsers = parser.add_subparsers(dest='command')
