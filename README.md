@@ -14,7 +14,7 @@ A GTD (Get Things Done) task management system integrated with GitHub Issues and
 ## Installation
 
 ```bash
-pip install taskstack
+pip install git+https://github.com/DiosDelRayo/taskstack.git
 ```
 
 ## Configuration
