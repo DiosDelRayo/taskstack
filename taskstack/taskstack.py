@@ -114,3 +114,32 @@ class TaskStack:
             return True
         return False
 
+        def list_tasks(self, filter_labels=None):
+            """List tasks with optional label filtering"""
+            issues = self.github.issues_on(
+                self.github.me().login,
+                Config.get().repository(),
+                None,
+                self.github.login,
+                labels=filter_labels
+            )
+            return issues
+
+        def add_task(self, title: str, body: str = "", labels: list = None) -> bool:
+            """Create a new task (issue) in the repository"""
+            try:
+                repo = self.github.repository(self.github.me().login, Config.get().repository())
+                if not repo:
+                    return False
+                    
+                if labels is None:
+                    labels = []
+                    
+                issue = repo.create_issue(
+                    title=title,
+                    body=body,
+                    labels=labels
+                )
+                return bool(issue)
+            except Exception:
+                return False

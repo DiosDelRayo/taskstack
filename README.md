@@ -1,34 +1,82 @@
 # TaskStack
 
-## Objectives
+A GTD (Get Things Done) task management system integrated with GitHub Issues and Pomodoro technique.
 
-* GTD (Get Things Done)
-* Pomodoro
-* Now Page
-* Attributing time to tasks
-* History of Sessions worked on
+## Features
 
-## Uses
+* GitHub Issues integration for task management
+* Pomodoro technique support via KDE Plasma Widget (Fokus)
+* Task stacking and scheduling
+* GitHub Pages integration for "Now Page"
+* Session history tracking
+* Command-line interface for all operations
 
-* GitHub Pages for the 'Now Page'
-* Fokus (KDE Plasma Widget for Pomodoro)
-* GitHub Issues for GTD task Managment
-* gh CLI
-* Own python scripts to:
-    * [x] Switch current task
-    * [x] Load next task into the "TaskStack"
-    * [x] Stack Tasks for today or schedule ahead of time
-    * [x] Mark current active task (issue with label 'Active') with 'WIP' on 'focus start'
-    * [x] Unmark current active task (issue with label 'WIP') on 'focus end'
-* Pelican plugin to:
-    * parse tasks and create/update tasks(articles) in projects(folders)
-    * create the now page
+## Installation
 
-# Usage
-
-You need to add the config file `~/.config/taskstack/config.yml` into CWD with the content:
+```bash
+pip install taskstack
 ```
+
+## Configuration
+
+Create a config file at `~/.config/taskstack/config.yml` with:
+
+```yaml
 github:
-  token: <token>
-repository: <repository>
+  token: <your-github-token>
+repository: <your-repository>
 ```
+
+## Usage
+
+TaskStack provides the following commands:
+
+```bash
+# List all tasks
+taskstack list
+taskstack list --label bug  # Filter by label
+
+# Add a new task
+taskstack add "Task title" --body "Description" --labels bug feature
+
+# Stack management
+taskstack stack 123    # Stack task #123 for later
+taskstack unstack 123  # Remove task from stack
+taskstack next        # Load next stacked task
+
+# Task switching
+taskstack switch 123  # Switch to task #123
+
+# Pomodoro integration
+taskstack start      # Start focus session
+taskstack stop       # End focus session
+```
+
+## Task States
+
+* **Active**: Currently selected task
+* **WIP**: Task in progress (during Pomodoro session)
+* **Stacked**: Task scheduled for later
+
+## Integration
+
+* **GitHub Pages**: Used for the 'Now Page'
+* **Fokus**: KDE Plasma Widget for Pomodoro
+* **GitHub Issues**: Core task management
+* **gh CLI**: Alternative command-line interface
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+BIPCOT NoGov License:
+This software is released under BIPCOT NoGov License Version 3.
+Created by [@DiosDelRayo](https://github.com/DiosDelRayo)
+This license requires the following conditions be met:
+1. This software cannot be used by any government agency or government funded organization.
+2. All redistribution must retain this condition.
+3. Modified versions must also carry this license.
+4. Private commercial use is allowed.
+5. Creative works and media made using this software can be under any license.

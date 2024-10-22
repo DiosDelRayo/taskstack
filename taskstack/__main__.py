@@ -25,7 +25,16 @@ def main():
 
     # Next command
     next_parser = subparsers.add_parser('next', help='Load the next task into the TaskStack')
-
+    
+    # List command
+    list_parser = subparsers.add_parser('list', help='List tasks')
+    list_parser.add_argument('--label', '-l', help='Filter by label')
+    
+    # Add command
+    add_parser = subparsers.add_parser('add', help='Add a new task')
+    add_parser.add_argument('title', help='Task title')
+    add_parser.add_argument('--body', '-b', help='Task description')
+    add_parser.add_argument('--labels', '-l', nargs='+', help='Labels to add')
     args = parser.parse_args()
 
     taskstack = TaskStack()
@@ -47,6 +56,25 @@ def main():
         return
     if args.command == 'next':
         taskstack.next()
+        return
+    if args.command == 'list':
+        tasks = taskstack.list_tasks(args.label)
+        for task in tasks:
+            labels = [label.name for label in task.labels()]
+            status = ""
+            if "WIP" in labels:
+                status = "[WIP]"
+            elif "Active" in labels:
+                status = "[Active]"
+            elif "Stacked" in labels:
+                status = "[Stacked]"
+            print(f"#{task.number} {status} {task.title}")
+        return
+    if args.command == 'add':
+        if taskstack.add_task(args.title, args.body or "", args.labels or []):
+            print(f"Task '{args.title}' created successfully")
+        else:
+            print("Failed to create task")
         return
     parser.print_help()
 
