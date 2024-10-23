@@ -13,20 +13,34 @@ def next():
     taskstack = TaskStack()
     taskstack.next()
 
-def task_priority(task) -> int:
-    task.label_list = [label.name for label in task.labels()]
-    if 'WIP' in labels or 'Active' in labels:
-        return 10
-    prio = 0
-    if 'Stacked' in labels:
-        prio += 5
-    if 'Urgent' in labels:
-        prio += 2
-    if 'Important' in labels:
-        prio += 1
-    if 'Low Priority' in labels:
-        prio -= 10
-    return prio
+def process_tasks(tasks: list) -> list:
+    print('Proccess tasks...', end='', flush=True)
+    out = []
+    for task in tasks:
+        if not task.assignee:
+            continue
+        task.status = None
+        task.label_list = [label.name for label in task.original_labels]
+        if 'READ' in task.label_list or 'Idea' in task.label_list:
+            continue
+        task.priority = 0
+        priorities = [10, 10, 5, 2, 1, -10]
+        i = 0
+        for label in ('WIP', 'Active', 'Stacked'):
+            if label in task.label_list:
+                if task.status is None:
+                    task.status = f'[{label}]'
+                task.priority += priorities[i]
+                task.label_list.remove(label)
+            i += 1
+        for label in ('Urgent', 'Important', 'Low Priority'):
+            if label in task.label_list:
+                task.priority += priorities[i]
+            i += 1
+        out.append(task)
+    out.sort(key=lambda task: task.priority)
+    print('done')
+    return out
 
 def main():
     parser = ArgumentParser(description='TaskStack CLI')
@@ -88,26 +102,10 @@ def main():
         print('Load tasks...', end='', flush=True)
         tasks = taskstack.list_tasks(args.label)
         print('done')
-        for task in sorted(tasks, key=task_priority):
-            if not task.assignee:
-                continue
-            labels = task.label_list
-            status = []
-            if 'READ' in labels or 'Idea' in labels:
-                continue
-            if 'WIP' in labels:
-                status.append('[WIP]')
-                labels.remove('WIP')
-            elif 'Active' in labels:
-                status.append('[Active]')
-                labels.remove('Active')
-            elif 'Stacked' in labels:
-                status.append('[Stacked]')
-                labels.remove('Stacked')
-            l = ' '.join([f'[{label}]' for label in labels])
-            print(f"#{task.number:03d} {' '.join(status)}{' ' if len(status) > 0 else ''}{task.title}{' ' if len(labels) > 0 else ''}{l}")
+        for task in process_tasks(tasks):
+            print(f"#{task.number:03d} {task.status or ''}{' ' if task.status else ''}{task.title}{' ' if len(task.label_list) > 0 else ''}{' '.join(['[' + label + ']' for label in task.label_list])}")
             if task.milestone:
-                print(f'     >{task.milestone.title}')
+                print(f'     > {task.milestone.title}')
         return
     if args.command == 'add':
         if taskstack.add_task(args.title, args.body or '', args.labels or []):
