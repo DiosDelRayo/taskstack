@@ -13,6 +13,21 @@ def next():
     taskstack = TaskStack()
     taskstack.next()
 
+def task_priority(task) -> int:
+    labels = [label.name for label in task.labels()]
+    if 'WIP' in labels or 'Active' in labels:
+        return 10
+    prio = 0
+    if 'Stacked' in labels:
+        prio += 5
+    if 'Urgent' in labels:
+        prio += 2
+    if 'Important' in labels:
+        prio += 1
+    if 'Low Priority' in labels:
+        prio -= 10
+    return prio
+
 def main():
     parser = ArgumentParser(description='TaskStack CLI')
     subparsers = parser.add_subparsers(dest='command')
@@ -70,23 +85,35 @@ def main():
         taskstack.next()
         return
     if args.command == 'list':
+        print('Load tasks...', end='', flush=True)
         tasks = taskstack.list_tasks(args.label)
-        for task in tasks:
+        print('done')
+        for task in sorted(tasks, key=task_priority):
+            if not task.assignee:
+                continue
             labels = [label.name for label in task.labels()]
-            status = ""
-            if "WIP" in labels:
-                status = "[WIP]"
-            elif "Active" in labels:
-                status = "[Active]"
-            elif "Stacked" in labels:
-                status = "[Stacked]"
-            print(f"#{task.number} {status} {task.title}")
+            status = []
+            if 'READ' in labels or 'Idea' in labels:
+                continue
+            if 'WIP' in labels:
+                status.append('[WIP]')
+                labels.remove('WIP')
+            elif 'Active' in labels:
+                status.append('[Active]')
+                labels.remove('Active')
+            elif 'Stacked' in labels:
+                status.append('[Stacked]')
+                labels.remove('Stacked')
+            l = ' '.join([f'[{label}]' for label in labels])
+            print(f"#{task.number:03d} {' '.join(status)}{' ' if len(status) > 0 else ''}{task.title}{' ' if len(labels) > 0 else ''}{l}")
+            if task.milestone:
+                print(f'     >{task.milestone.title}')
         return
     if args.command == 'add':
-        if taskstack.add_task(args.title, args.body or "", args.labels or []):
+        if taskstack.add_task(args.title, args.body or '', args.labels or []):
             print(f"Task '{args.title}' created successfully")
         else:
-            print("Failed to create task")
+            print('Failed to create task')
         return
     parser.print_help()
 
