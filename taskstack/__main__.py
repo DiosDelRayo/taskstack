@@ -14,7 +14,7 @@ def next():
     taskstack.next()
 
 def task_priority(task) -> int:
-    labels = [label.name for label in task.labels()]
+    task.label_list = [label.name for label in task.labels()]
     if 'WIP' in labels or 'Active' in labels:
         return 10
     prio = 0
@@ -91,7 +91,7 @@ def main():
         for task in sorted(tasks, key=task_priority):
             if not task.assignee:
                 continue
-            labels = [label.name for label in task.labels()]
+            labels = task.label_list
             status = []
             if 'READ' in labels or 'Idea' in labels:
                 continue
