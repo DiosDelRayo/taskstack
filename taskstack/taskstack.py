@@ -21,7 +21,6 @@ class TaskStack:
             ):
             wip = True
             issue.remove_label('WIP')
-            issue.add_labels('Stacked')
         for issue in self.github.issues_on(
             self.github.me().login,
             Config.get().repository(),
@@ -104,6 +103,7 @@ class TaskStack:
         return True
 
     def next(self) -> bool:
+        previous = None
         for issue in self.github.issues_on(
             self.github.me().login,
             Config.get().repository(),
@@ -112,6 +112,7 @@ class TaskStack:
             labels='Active'
             ):
             issue.remove_label('Active')
+            previous = issue
         wip: bool = False
         for issue in self.github.issues_on(
             self.github.me().login,
@@ -133,6 +134,8 @@ class TaskStack:
             issue.remove_label('Stacked')
             if wip:
                 issue.add_labels('WIP')
+            if previous:
+                previous.add_labels('Stacked')
             return True
         return False
 
