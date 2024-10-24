@@ -1,5 +1,6 @@
 from.taskstack import TaskStack
 from argparse import ArgumentParser
+from typing import Optional
 
 def start():
     taskstack = TaskStack()
@@ -12,6 +13,10 @@ def stop():
 def next():
     taskstack = TaskStack()
     taskstack.next()
+
+def done(task: Optional[int] = None):
+    taskstack = TaskStack()
+    taskstack.done(task)
 
 def process_tasks(tasks: list) -> list:
     print('Proccess tasks...', end='', flush=True)
@@ -66,7 +71,11 @@ def main():
 
     # Next command
     next_parser = subparsers.add_parser('next', help='Load the next task into the TaskStack')
-    
+
+    # Done command
+    done_parser = subparsers.add_parser('done', help='Mark current task as done, if inside a pomodoro it will switch to the next one. You can also provide a task number to mark any task as done.')
+    done_parser.add_argument('task_id', type=int, nargs='?', help='ID of the task to mark as done')
+
     # List command
     list_parser = subparsers.add_parser('list', help='List tasks')
     list_parser.add_argument('--label', '-l', help='Filter by label')
@@ -97,6 +106,9 @@ def main():
         return
     if args.command == 'next':
         taskstack.next()
+        return
+    if args.command == 'done':
+        taskstack.done(args.task_id)
         return
     if args.command == 'list':
         print('Load tasks...', end='', flush=True)

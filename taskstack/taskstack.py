@@ -1,5 +1,6 @@
 from .github import github_session
 from .config import Config
+from typing import Optional
 
 class TaskStack:
 
@@ -20,6 +21,7 @@ class TaskStack:
             ):
             wip = True
             issue.remove_label('WIP')
+            issue.add_labels('Stacked')
         for issue in self.github.issues_on(
             self.github.me().login,
             Config.get().repository(),
@@ -28,6 +30,7 @@ class TaskStack:
             labels='Active'
             ):
             issue.remove_label('Active')
+            issue.add_labels('Stacked')
         next.add_labels('Active')
         if wip:
             next.add_labels('WIP')
@@ -65,6 +68,25 @@ class TaskStack:
             ):
             issue.remove_label('WIP')
             return True
+        return False
+
+    def done(self, task: Optional[int] = None) -> bool:
+        if task:
+            issue = self.github.issue(self.github.me().login, Config.get().repository(), task)
+            if not issue:
+                return False
+            labels = [label.name for label in issue.original_labels if label.name not in ('Stacked', 'Active', 'WIP')]
+            issue.replace_labels(labels)
+            return issue.close()
+        for issue in self.github.issues_on(
+            self.github.me().login,
+            Config.get().repository(),
+            None,
+            self.github.login,
+            labels='WIP'
+            ):
+            self.next()
+            return self.done(issue.number)
         return False
 
     def stack(self, task: int) -> bool:
