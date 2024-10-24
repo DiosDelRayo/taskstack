@@ -29,6 +29,7 @@ class TaskStack:
             labels='Active'
             ):
             issue.remove_label('Active')
+            issue.add_labels('Stacked')
         next.add_labels('Active')
         if wip:
             next.add_labels('WIP')
