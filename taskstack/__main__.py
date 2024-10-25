@@ -2,21 +2,27 @@ from.taskstack import TaskStack
 from argparse import ArgumentParser
 from typing import Optional
 
-def start():
-    taskstack = TaskStack()
-    taskstack.start()
+def start() -> None:
+    TaskStack().start()
 
-def stop():
-    taskstack = TaskStack()
-    taskstack.stop()
+def stop() -> None:
+    TaskStack().stop()
 
-def next():
-    taskstack = TaskStack()
-    taskstack.next()
+def next() -> None:
+    TaskStack().next()
 
-def done(task: Optional[int] = None):
-    taskstack = TaskStack()
-    taskstack.done(task)
+def done(task: Optional[int] = None) -> None:
+    TaskStack().done(task)
+
+def list(label: str) -> None:
+    print('Load tasks...', end='', flush=True)
+    tasks = TaskStack().list_tasks(label)
+    print('done')
+    for task in process_tasks(tasks):
+        print(f"#{task.number:03d} {task.status or ''}{' ' if task.status else ''}{task.title}{' ' if len(task.label_list) > 0 else ''}{' '.join(['[' + label + ']' for label in task.label_list])}")
+        if task.milestone:
+            print(f'     > {task.milestone.title}')
+    return
 
 def process_tasks(tasks: list) -> list:
     print('Proccess tasks...', end='', flush=True)
@@ -63,7 +69,7 @@ def main():
 
     # Stack command
     stack_parser = subparsers.add_parser('stack', help='Stack a task for later')
-    stack_parser.add_argument('task_id', type=int, help='ID of the task to stack')
+    stack_parser.add_argument('task_id', type=int, nargs='?', help='ID of the task to stack, or without id will list tasks in stack')
 
     # Unstack command
     unstack_parser = subparsers.add_parser('unstack', help='Unstack a task')
@@ -87,40 +93,35 @@ def main():
     add_parser.add_argument('--labels', '-l', nargs='+', help='Labels to add')
     args = parser.parse_args()
 
-    taskstack = TaskStack()
-
     if args.command == 'switch':
-        taskstack.switch(args.task_id)
+        TaskStack().switch(args.task_id)
         return
     if args.command == 'start':
-        taskstack.start()
+        TaskStack().start()
         return
     if args.command == 'stop':
-        taskstack.stop()
+        TaskStack().stop()
         return
     if args.command == 'stack':
-        taskstack.stack(args.task_id)
+        if not args.task_id:
+            list('Stacked')
+            return
+        TaskStack().stack(args.task_id)
         return
     if args.command == 'unstack':
-        taskstack.unstack(args.task_id)
+        TaskStack().unstack(args.task_id)
         return
     if args.command == 'next':
-        taskstack.next()
+        TaskStack().next()
         return
     if args.command == 'done':
-        taskstack.done(args.task_id)
+        TaskStack().done(args.task_id)
         return
     if args.command == 'list':
-        print('Load tasks...', end='', flush=True)
-        tasks = taskstack.list_tasks(args.label)
-        print('done')
-        for task in process_tasks(tasks):
-            print(f"#{task.number:03d} {task.status or ''}{' ' if task.status else ''}{task.title}{' ' if len(task.label_list) > 0 else ''}{' '.join(['[' + label + ']' for label in task.label_list])}")
-            if task.milestone:
-                print(f'     > {task.milestone.title}')
+        list(args.label)
         return
     if args.command == 'add':
-        if taskstack.add_task(args.title, args.body or '', args.labels or []):
+        if TaskStack().add_task(args.title, args.body or '', args.labels or []):
             print(f"Task '{args.title}' created successfully")
         else:
             print('Failed to create task')

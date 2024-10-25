@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='taskstack',
-    version='0.3.1',
+    version='0.3.2',
     packages=['taskstack'],
     install_requires=['github3.py'],
     entry_points={
